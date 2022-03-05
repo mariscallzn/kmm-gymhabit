@@ -9,3 +9,4 @@ pluginManagement {
 rootProject.name = "GymHabit"
 include(":androidApp")
 include(":shared")
+enableFeaturePreview("VERSION_CATALOGS")
