@@ -1,0 +1,95 @@
+CREATE TABLE Muscle(
+id INTEGER PRIMARY KEY,
+name TEXT NOT NULL
+);
+
+CREATE TABLE Equipment(
+id INTEGER PRIMARY KEY,
+name TEXT NOT NULL
+);
+
+CREATE TABLE Exercise(
+id INTEGER PRIMARY KEY,
+name TEXT NOT NULL
+);
+
+CREATE TABLE ExerciseEquipment(
+id INTEGER PRIMARY KEY,
+exercise_id INTEGER NOT NULL,
+equipment_id INTEGER NOT NULL,
+FOREIGN KEY(exercise_id) REFERENCES Exercise(id),
+FOREIGN KEY(equipment_id) REFERENCES Equipment(id)
+);
+
+CREATE TABLE ExerciseMuscle(
+id INTEGER PRIMARY KEY,
+exercise_id INTEGER NOT NULL,
+muscle_id INTEGER NOT NULL,
+FOREIGN KEY(exercise_id) REFERENCES Exercise(id),
+FOREIGN KEY(muscle_id) REFERENCES Muscle(id)
+);
+
+CREATE TABLE Routine(
+id INTEGER PRIMARY KEY,
+title TEXT NOT NULL,
+datetime TEXT
+);
+
+CREATE TABLE RoutineExercises(
+id INTEGER PRIMARY KEY,
+routine_id INTEGER NOT NULL,
+exercise_id INTEGER NOT NULL,
+FOREIGN KEY(exercise_id) REFERENCES Exercise(id),
+FOREIGN KEY(routine_id) REFERENCES Routine(id)
+);
+
+CREATE TABLE WorkoutSet(
+id INTEGER PRIMARY KEY,
+exercise_id INTEGER NOT NULL,
+reps INTEGER NOT NULL,
+weight REAL AS Float NOT NULL,
+weight_unit TEXT NOT NULL, -- This will indicate lb, kg, seg, min, hrs, na
+datetime TEXT NOT NULL,
+note TEXT,
+mood INTEGER,--Scale 0-10
+FOREIGN KEY(exercise_id) REFERENCES Exercise(id)
+);
+
+INSERT INTO Muscle (name)
+VALUES ("Chest"),("Triceps"),("Biceps"),("Back"),("Leg"),("Abs");
+
+INSERT INTO Equipment (name)
+VALUES ("Dumbbell"), ("Barbell"),("Machine"),("Cable"),("Disk"),("None");
+
+insertExercise:
+INSERT INTO Exercise(name)
+VALUES (?);
+
+insertExerciseEquipment:
+INSERT INTO ExerciseEquipment(exercise_id, equipment_id)
+VALUES (?,?);
+
+insertExerciseMuscle:
+INSERT INTO ExerciseMuscle(exercise_id, muscle_id)
+VALUES (?,?);
+
+insertRoutine:
+INSERT INTO Routine(title, datetime)
+VALUES (?,?);
+
+insertRoutineExercises:
+INSERT INTO RoutineExercises(routine_id, exercise_id)
+VALUES (?,?);
+
+insertWorkoutSet:
+INSERT INTO WorkoutSet(exercise_id, datetime, mood, note, reps, weight, weight_unit)
+VALUES (?,?,?,?,?,?,?);
+
+selectAllMuscles:
+SELECT * FROM Muscle;
+
+selectAllEquipments:
+SELECT * FROM Equipment;
+
+lastInsertRowId:
+SELECT last_insert_rowid();
