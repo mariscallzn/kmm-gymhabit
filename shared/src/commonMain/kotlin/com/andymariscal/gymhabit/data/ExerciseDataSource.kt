@@ -1,6 +1,7 @@
 package com.andymariscal.gymhabit.data
 
 import db.AppDatabaseQueries
+import db.Exercise
 
 interface ExerciseDataSource {
     suspend fun insertExercise(
@@ -8,6 +9,8 @@ interface ExerciseDataSource {
         muscleIds: List<Long>,
         equipmentIds: List<Long>
     ): Long
+
+    suspend fun selectAllExercises(): List<Exercise>
 }
 
 internal class ExerciseDataSourceImpl(
@@ -22,11 +25,17 @@ internal class ExerciseDataSourceImpl(
         dbQuery.insertExercise(name)
         val exerciseId = dbQuery.lastInsertRowId().executeAsOne()
         muscleIds.forEach {
+            println("muscle id: $it")
             dbQuery.insertExerciseMuscle(exerciseId, it)
         }
         equipmentIds.forEach {
+            println("equipment id: $it")
             dbQuery.insertExerciseEquipment(exerciseId, it)
         }
         exerciseId
+    }
+
+    override suspend fun selectAllExercises(): List<Exercise> = dbQuery.transactionWithResult {
+        dbQuery.selectAllExercises().executeAsList()
     }
 }

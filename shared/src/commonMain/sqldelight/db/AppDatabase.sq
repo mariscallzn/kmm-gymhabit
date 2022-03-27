@@ -91,5 +91,8 @@ SELECT * FROM Muscle;
 selectAllEquipments:
 SELECT * FROM Equipment;
 
+selectAllExercises:
+SELECT * FROM Exercise;
+
 lastInsertRowId:
 SELECT last_insert_rowid();

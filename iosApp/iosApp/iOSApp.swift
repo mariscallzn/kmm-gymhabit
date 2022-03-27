@@ -1,10 +1,19 @@
 import SwiftUI
+import shared
 
 @main
-struct iOSApp: App {
+class iOSApp: App {
+    
+    let core = GymHabitCore(databaseDriverFactory: DatabaseDriverFactory())
+    
+    required init() {
+        core.startAppFramework()
+        print("Andy: \(NSHomeDirectory())")
+    }
+    
 	var body: some Scene {
 		WindowGroup {
-			ContentView()
+            ContentView()
 		}
 	}
 }

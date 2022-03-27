@@ -23,11 +23,11 @@ class MainActivity : AppCompatActivity() {
         val tv: TextView = findViewById(R.id.text_view)
         tv.text = greet()
 
-        GymHabitCore(DatabaseDriverFactory(this)).init()
+        GymHabitCore(DatabaseDriverFactory(this)).startAppFramework()
 
         GlobalScope.launch {
             val state = ExerciseStore()
-            state.dispatch(ExerciseAction.LoadCatalogs)
+            state.dispatch(ExerciseAction.InitialLoad)
 
             state.observeState().collect {
                 Log.e("Andres", "$it")

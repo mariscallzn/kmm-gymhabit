@@ -27,7 +27,7 @@ class GymHabitCore(
         single<Repository> { RepositoryImpl(get(), get(), get()) }
     }
 
-    fun init() {
+    fun startAppFramework() {
         startKoin {
             modules(appModule, dataSources, repositoryModule)
         }

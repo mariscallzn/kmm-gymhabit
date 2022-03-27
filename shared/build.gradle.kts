@@ -20,6 +20,7 @@ kotlin {
         podfile = project.file("../iosApp/Podfile")
         framework {
             baseName = "shared"
+            isStatic = false //https://github.com/JetBrains/kotlin-native/issues/3059
         }
     }
     
