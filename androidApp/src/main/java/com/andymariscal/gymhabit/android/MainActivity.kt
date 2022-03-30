@@ -1,15 +1,18 @@
 package com.andymariscal.gymhabit.android
 
 import android.os.Bundle
-import android.util.Log
-import android.widget.TextView
+import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.layout.Column
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.tooling.preview.Preview
 import com.andymariscal.gymhabit.Greeting
-import com.andymariscal.gymhabit.app.ExerciseAction
 import com.andymariscal.gymhabit.app.ExerciseStore
 import com.andymariscal.gymhabit.database.DatabaseDriverFactory
 import com.andymariscal.gymhabit.di.GymHabitCore
-import kotlinx.coroutines.*
 
 fun greet(): String {
     return Greeting().greeting()
@@ -18,20 +21,27 @@ fun greet(): String {
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-
-        val tv: TextView = findViewById(R.id.text_view)
-        tv.text = greet()
-
         GymHabitCore(DatabaseDriverFactory(this)).startAppFramework()
-
-        GlobalScope.launch {
-            val state = ExerciseStore()
-            state.dispatch(ExerciseAction.InitialLoad)
-
-            state.observeState().collect {
-                Log.e("Andres", "$it")
-            }
+        setContent {
+            MessageCard(name = "")
         }
     }
 }
+
+@Composable
+fun MessageCard(name: String) {
+    val store = ExerciseStore()
+    val uiState by store.observeState().collectAsState()
+    Column {
+        uiState.equipments.forEach {
+            Text(text = it.name)
+        }
+    }
+}
+
+@Preview
+@Composable
+fun MainPreview() {
+    MessageCard(name = "Test")
+}
+
