@@ -11,12 +11,12 @@ import shared
 
 class ObservableExerciseStore: ObservableObject {
     @Published public var state: ExerciseState = ExerciseState(exercises: [UiExercise](), muscles: [UiMuscles](), equipments: [UiEquipment]())
-    @Published public var effect: ExerciseEffect?
+    @Published public var event: ExerciseEvent?
     
     let store: ExerciseStore
     
     var stateWathcer: Closeable?
-    var sideEffectWatcher: Closeable?
+    var eventWatcher: Closeable?
     
     init(store: ExerciseStore){
         self.store = store
@@ -24,8 +24,8 @@ class ObservableExerciseStore: ObservableObject {
         stateWathcer = self.store.watchState().watch {[weak self] state in
             self?.state = state
         }
-        sideEffectWatcher = self.store.watchSideEffect().watch {[weak self] sideEffect in
-            self?.effect = sideEffect
+        eventWatcher = self.store.watchEvent().watch {[weak self] event in
+            self?.event = event
         }
     }
     
@@ -35,6 +35,6 @@ class ObservableExerciseStore: ObservableObject {
     
     deinit {
         stateWathcer?.close()
-        sideEffectWatcher?.close()
+        eventWatcher?.close()
     }
 }

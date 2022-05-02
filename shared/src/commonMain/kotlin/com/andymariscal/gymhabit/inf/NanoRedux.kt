@@ -5,10 +5,10 @@ import kotlinx.coroutines.flow.StateFlow
 
 interface State
 interface Action
-interface Effect
+interface Event
 
-interface Store<S : State, A : Action, E : Effect> {
+interface Store<S : State, A : Action, E : Event> {
     fun observeState(): StateFlow<S>
-    fun observeSideEffect(): Flow<E>
+    fun observeEvent(): Flow<E>
     fun dispatch(action: A)
 }

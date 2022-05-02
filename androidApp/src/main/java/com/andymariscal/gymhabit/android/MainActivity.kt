@@ -2,15 +2,15 @@ package com.andymariscal.gymhabit.android
 
 import android.os.Bundle
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Column
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.tooling.preview.Preview
 import com.andymariscal.gymhabit.Greeting
-import com.andymariscal.gymhabit.app.ExerciseStore
+import com.andymariscal.gymhabit.app.ExerciseState
 import com.andymariscal.gymhabit.database.DatabaseDriverFactory
 import com.andymariscal.gymhabit.di.GymHabitCore
 
@@ -18,23 +18,42 @@ fun greet(): String {
     return Greeting().greeting()
 }
 
+//SUPER WIP, Nothing works
 class MainActivity : AppCompatActivity() {
+
+    private val viewModel by viewModels<ExerciseViewModel>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         GymHabitCore(DatabaseDriverFactory(this)).startAppFramework()
         setContent {
-            MessageCard(name = "")
+            MaterialTheme {
+                ExerciseScreen(viewModel = viewModel)
+            }
         }
     }
 }
 
 @Composable
-fun MessageCard(name: String) {
-    val store = ExerciseStore()
-    val uiState by store.observeState().collectAsState()
+fun ExerciseScreen(viewModel: ExerciseViewModel) {
+    val state by viewModel.state.collectAsState()
+    CreateExercise(state)
+}
+
+@Composable
+fun CreateExercise(state: ExerciseState) {
+    var name by remember { mutableStateOf("") }
     Column {
-        uiState.equipments.forEach {
-            Text(text = it.name)
+        TextField(value = name, onValueChange = { name = it} )
+        Row {
+           Text(text = "Muscles")
+           DropdownMenu(expanded = false, onDismissRequest = { /*TODO*/ }) {
+               state.muscles.forEach {
+                   DropdownMenuItem(onClick = { /*TODO*/ }) {
+                       Text(it.name)
+                   }
+               }
+           }
         }
     }
 }
@@ -42,6 +61,6 @@ fun MessageCard(name: String) {
 @Preview
 @Composable
 fun MainPreview() {
-    MessageCard(name = "Test")
+    ExerciseScreen(ExerciseViewModel())
 }
 

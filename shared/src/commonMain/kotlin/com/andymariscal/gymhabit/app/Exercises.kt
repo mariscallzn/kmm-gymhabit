@@ -1,35 +1,42 @@
 package com.andymariscal.gymhabit.app
 
-import com.andymariscal.gymhabit.inf.Action
-import com.andymariscal.gymhabit.inf.Effect
-import com.andymariscal.gymhabit.inf.State
-import com.andymariscal.gymhabit.inf.Store
+import com.andymariscal.gymhabit.inf.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-//WIP TESTS
+//region Nano Redux Objects
+/**
+ * State is the representation of the UI, it's immutable and it needs reducers to represent the new
+ * value
+ */
 data class ExerciseState(
     val exercises: List<UiExercise>,
     val muscles: List<UiMuscles>,
     val equipments: List<UiEquipment>
 ) : State
 
+/**
+ * Actions is any request from the user executed by any action done (Click buttons, refresh, navigate)
+ */
 sealed class ExerciseAction : Action {
     object InitialLoad : ExerciseAction()
-    object LoadExercises: ExerciseAction()
+    object ShowAllExercises: ExerciseAction()
     data class Add(
         val exercise: UiExercise
     ) : ExerciseAction()
 }
 
-sealed class ExerciseEffect : Effect {
+/**
+ * Events are disposable events that only happen once and the state is not expected to be changed
+ * Navigation for example.
+ */
+sealed class ExerciseEvent : Event
+//endregion
 
-}
-
-//UI Models
+// region UI Models
 data class UiExercise(
     val id: Long?,
     val name: String,
@@ -46,22 +53,23 @@ data class UiEquipment(
     val id: Long,
     val name: String
 )
+//endregion
 
-class ExerciseStore : Store<ExerciseState, ExerciseAction, ExerciseEffect>,
+//region Store
+class ExerciseStore : Store<ExerciseState, ExerciseAction, ExerciseEvent>,
     CoroutineScope by CoroutineScope(Dispatchers.Main) {
 
-    private val appStore = AppStore()
-    private val repository = appStore.provideRepository()
+    private val repository = AppStore().provideRepository()
 
     private val state = MutableStateFlow(ExerciseState(emptyList(), emptyList(), emptyList()))
-    private val sideEffect = MutableSharedFlow<ExerciseEffect>()
+    private val event = MutableSharedFlow<ExerciseEvent>()
 
     override fun observeState(): StateFlow<ExerciseState> = state
-    override fun observeSideEffect(): Flow<ExerciseEffect> = sideEffect
+    override fun observeEvent(): Flow<ExerciseEvent> = event
 
     override fun dispatch(action: ExerciseAction) {
         when (action) {
-            is ExerciseAction.LoadExercises -> {
+            is ExerciseAction.ShowAllExercises -> {
                 launch {
                     state.value = state.value.copy(
                         exercises = repository.getAllExercises().map {
@@ -73,10 +81,14 @@ class ExerciseStore : Store<ExerciseState, ExerciseAction, ExerciseEffect>,
                 launch {
                     val equipments = repository.getAllEquipments()
                     val muscles = repository.getAllMuscles()
-                    val exercise = repository.getAllExercises()
+                    val exercise = repository.getAllFullExercises()
                     state.value = state.value.copy(
                         exercises = exercise.map {
-                            UiExercise(it.id, it.name, emptyList(), emptyList())
+                            UiExercise(
+                                it.exercise.id,
+                                it.exercise.name,
+                                it.muscles.map { uiM -> UiMuscles(uiM.id, uiM.name) },
+                                it.equipments.map { uiEq -> UiEquipment(uiEq.id, uiEq.name) })
                         },
                         muscles = muscles.map {
                             UiMuscles(it.id, it.name)
@@ -92,9 +104,10 @@ class ExerciseStore : Store<ExerciseState, ExerciseAction, ExerciseEffect>,
                     repository.createExercise(exercise.name,
                         exercise.muscles.map { it.id },
                         exercise.equipments.map { it.id })
-                    dispatch(ExerciseAction.LoadExercises)
+                    dispatch(ExerciseAction.ShowAllExercises)
                 }
             }
         }
     }
 }
+//endregion

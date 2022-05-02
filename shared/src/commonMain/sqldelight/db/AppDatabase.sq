@@ -94,5 +94,19 @@ SELECT * FROM Equipment;
 selectAllExercises:
 SELECT * FROM Exercise;
 
+selectMusclesByExerciseId:
+SELECT Muscle.id, Muscle.name
+FROM Muscle
+JOIN ExerciseMuscle
+	ON Muscle.id = ExerciseMuscle.muscle_id
+WHERE ExerciseMuscle.exercise_id = ?;
+
+selectEquipmentsByExerciseId:
+SELECT Equipment.id, Equipment.name
+FROM Equipment
+JOIN ExerciseEquipment
+	ON Equipment.id = ExerciseEquipment.equipment_id
+WHERE ExerciseEquipment.exercise_id = ?;
+
 lastInsertRowId:
 SELECT last_insert_rowid();
