@@ -1,4 +1,4 @@
-package com.andymariscal.gymhabit.android
+package com.andymariscal.gymhabit.android.ui.exercise
 
 import androidx.lifecycle.ViewModel
 import com.andymariscal.gymhabit.app.ExerciseAction
@@ -9,6 +9,10 @@ class ExerciseViewModel: ViewModel() {
     val state = store.observeState()
 
     init {
-        store.dispatch(ExerciseAction.InitialLoad)
+        dispatch(ExerciseAction.InitialLoad)
+    }
+
+    fun dispatch(action: ExerciseAction){
+        store.dispatch(action)
     }
 }

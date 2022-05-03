@@ -23,7 +23,7 @@ data class ExerciseState(
  */
 sealed class ExerciseAction : Action {
     object InitialLoad : ExerciseAction()
-    object ShowAllExercises: ExerciseAction()
+    object ShowAllExercises : ExerciseAction()
     data class Add(
         val exercise: UiExercise
     ) : ExerciseAction()
@@ -72,8 +72,12 @@ class ExerciseStore : Store<ExerciseState, ExerciseAction, ExerciseEvent>,
             is ExerciseAction.ShowAllExercises -> {
                 launch {
                     state.value = state.value.copy(
-                        exercises = repository.getAllExercises().map {
-                            UiExercise(it.id, it.name, emptyList(), emptyList())
+                        exercises = repository.getAllFullExercises().map {
+                            UiExercise(
+                                it.exercise.id,
+                                it.exercise.name,
+                                it.muscles.map { uiM -> UiMuscles(uiM.id, uiM.name) },
+                                it.equipments.map { uiEq -> UiEquipment(uiEq.id, uiEq.name) })
                         })
                 }
             }

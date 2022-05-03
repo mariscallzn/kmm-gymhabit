@@ -45,4 +45,8 @@ dependencies {
     implementation(libs.androidx.compose.material)
     //Compose Utils
     implementation(libs.activity.compose)
+    //Lifecycle
+    implementation(libs.androidx.lifecycle.compose.viewmodel)
+
+
 }
