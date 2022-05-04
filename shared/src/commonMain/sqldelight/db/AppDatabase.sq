@@ -29,30 +29,70 @@ FOREIGN KEY(exercise_id) REFERENCES Exercise(id),
 FOREIGN KEY(muscle_id) REFERENCES Muscle(id)
 );
 
-CREATE TABLE Routine(
+--
+--TODO GoalPlan (i.e. Weight loss, muscle gain etc.)
+--
+
+--Exercises that you would do in one instance
+--(Enter the gym, working out and then leaveing the gym is one instance)
+--Example: Monday, Tuesday or 1, 2 or Chest day, Leg Day, Cardio etc.
+CREATE TABLE RoutinePlan(
 id INTEGER PRIMARY KEY,
 title TEXT NOT NULL,
-datetime TEXT
+created_datetime TEXT NOT NULL
 );
 
-CREATE TABLE RoutineExercises(
+--Exercises assigned to a Routine
+CREATE TABLE RoutinePlanExercises(
 id INTEGER PRIMARY KEY,
-routine_id INTEGER NOT NULL,
+routine_plan_id INTEGER NOT NULL,
 exercise_id INTEGER NOT NULL,
+created_datetime TEXT NOT NULL,
 FOREIGN KEY(exercise_id) REFERENCES Exercise(id),
-FOREIGN KEY(routine_id) REFERENCES Routine(id)
+FOREIGN KEY(routine_plan_id) REFERENCES RoutinePlan(id)
 );
 
-CREATE TABLE WorkoutSet(
+--Definition on how the set is planed by a routine plan exercise
+CREATE TABLE WorkoutSetPlan(
 id INTEGER PRIMARY KEY,
-exercise_id INTEGER NOT NULL,
+routine_plan_exercise_id INTEGER NOT NULL,
 reps INTEGER NOT NULL,
 weight REAL AS Float NOT NULL,
 weight_unit TEXT NOT NULL, -- This will indicate lb, kg, seg, min, hrs, na
-datetime TEXT NOT NULL,
-note TEXT,
-mood INTEGER,--Scale 0-10
+FOREIGN KEY(routine_plan_exercise_id) REFERENCES RoutinePlanExercises(id)
+);
+
+--The execution of a routine instance (All sets done in a routine)
+CREATE TABLE RoutineEntry (
+id INTEGER PRIMARY KEY,
+routine_plan_id INTEGER NOT NULL,
+created_datetime TEXT NOT NULL,
+FOREIGN KEY(routine_plan_id) REFERENCES RoutinePlan(id)
+);
+
+--Reaction to a specific exercise on a specific routine instance
+CREATE TABLE ExerciseReaction(
+id INTEGER PRIMARY KEY,
+routine_entry_id INTEGER NOT NULL,
+exercise_id INTEGER NOT NULL,
+reaction TEXT NOT NULL,
+created_datetime TEXT NOT NULL,
+FOREIGN KEY(routine_entry_id) REFERENCES RoutineEntry(id),
 FOREIGN KEY(exercise_id) REFERENCES Exercise(id)
+);
+
+--The actual execution that the athlete did (Independently of the set definition)
+CREATE TABLE WorkoutSetEntry(
+id INTEGER PRIMARY KEY,
+exercise_id INTEGER NOT NULL,
+routine_entry_id INTEGER NOT NULL,
+reps INTEGER NOT NULL,
+weight REAL AS Float NOT NULL,
+weight_unit TEXT NOT NULL, -- This will indicate lb, kg, seg, min, hrs, na
+created_datetime TEXT NOT NULL,
+mood INTEGER,--Scale 0-10
+FOREIGN KEY(exercise_id) REFERENCES Exercise(id),
+FOREIGN KEY(routine_entry_id) REFERENCES RoutineEntry(id)
 );
 
 INSERT INTO Muscle (name)
@@ -73,17 +113,29 @@ insertExerciseMuscle:
 INSERT INTO ExerciseMuscle(exercise_id, muscle_id)
 VALUES (?,?);
 
-insertRoutine:
-INSERT INTO Routine(title, datetime)
+insertRoutinePlan:
+INSERT INTO RoutinePlan(title, created_datetime)
 VALUES (?,?);
 
-insertRoutineExercises:
-INSERT INTO RoutineExercises(routine_id, exercise_id)
-VALUES (?,?);
+insertRoutinePlanExercises:
+INSERT INTO RoutinePlanExercises(routine_plan_id, exercise_id, created_datetime)
+VALUES (?,?, ?);
 
-insertWorkoutSet:
-INSERT INTO WorkoutSet(exercise_id, datetime, mood, note, reps, weight, weight_unit)
-VALUES (?,?,?,?,?,?,?);
+insertWorkoutSetPlan:
+INSERT INTO WorkoutSetPlan(routine_plan_exercise_id, reps, weight, weight_unit)
+VALUES(?,?,?,?);
+
+insertRoutineEntry:
+INSERT INTO RoutineEntry(routine_plan_id, created_datetime)
+VALUES(?, ?);
+
+insertExerciseReaction:
+INSERT INTO ExerciseReaction(routine_entry_id, exercise_id, reaction, created_datetime)
+VALUES(?,?,?,?);
+
+insertWorkoutSetEntry:
+INSERT INTO WorkoutSetEntry(exercise_id, routine_entry_id, created_datetime, mood, reps, weight, weight_unit)
+VALUES (?,?, ?, ?,?,?,?);
 
 selectAllMuscles:
 SELECT * FROM Muscle;
