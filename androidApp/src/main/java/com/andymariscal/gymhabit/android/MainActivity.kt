@@ -12,8 +12,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //TODO move this to Application class
-        GymHabitCore(DatabaseDriverFactory(this)).startAppFramework()
         setContent {
             MaterialTheme {
                 GymHabitApp()
