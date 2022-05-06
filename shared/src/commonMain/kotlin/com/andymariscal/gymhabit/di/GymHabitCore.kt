@@ -21,10 +21,11 @@ class GymHabitCore(
         single<CatalogsDataSource> { CatalogsDataSourceImpl(get()) }
         single<ExerciseDataSource> { ExerciseDataSourceImpl(get()) }
         single<WorkoutSetDataSource> { WorkoutSetDataSourceImpl(get()) }
+        single<RoutinePlanDataSource> { RoutinePlanDataSourceImpl(get()) }
     }
 
     private val repositoryModule = module {
-        single<Repository> { RepositoryImpl(get(), get(), get()) }
+        single<Repository> { RepositoryImpl(get(), get(), get(), get()) }
     }
 
     fun startAppFramework() {

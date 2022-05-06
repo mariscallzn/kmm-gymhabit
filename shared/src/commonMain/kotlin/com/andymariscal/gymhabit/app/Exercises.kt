@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-//region Nano Redux Objects
+//region Nano Redux Models
 /**
  * State is the representation of the UI, it's immutable and it needs reducers to represent the new
  * value

@@ -11,8 +11,8 @@ interface ExerciseDataSource {
     ): Long
 
     suspend fun selectAllExercises(): List<Exercise>
-
     suspend fun selectAllFullExercises(): List<FullExercise>
+    suspend fun getAllExercisesByRoutinePlanId(id: Long): List<FullExercise>
 }
 
 internal class ExerciseDataSourceImpl(
@@ -27,11 +27,9 @@ internal class ExerciseDataSourceImpl(
         dbQuery.insertExercise(name)
         val exerciseId = dbQuery.lastInsertRowId().executeAsOne()
         muscleIds.forEach {
-            println("muscle id: $it")
             dbQuery.insertExerciseMuscle(exerciseId, it)
         }
         equipmentIds.forEach {
-            println("equipment id: $it")
             dbQuery.insertExerciseEquipment(exerciseId, it)
         }
         exerciseId
@@ -44,6 +42,17 @@ internal class ExerciseDataSourceImpl(
     override suspend fun selectAllFullExercises(): List<FullExercise> =
         dbQuery.transactionWithResult {
             dbQuery.selectAllExercises().executeAsList().map {
+                FullExercise(
+                    it,
+                    dbQuery.selectMusclesByExerciseId(it.id).executeAsList(),
+                    dbQuery.selectEquipmentsByExerciseId(it.id).executeAsList()
+                )
+            }
+        }
+
+    override suspend fun getAllExercisesByRoutinePlanId(id: Long): List<FullExercise> =
+        dbQuery.transactionWithResult {
+            dbQuery.getAllExercisesByRoutinePlanId(id).executeAsList().map {
                 FullExercise(
                     it,
                     dbQuery.selectMusclesByExerciseId(it.id).executeAsList(),
