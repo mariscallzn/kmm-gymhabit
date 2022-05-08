@@ -1,7 +1,8 @@
 package com.andymariscal.gymhabit.data
 
 import com.andymariscal.gymhabit.data.model.FullExercise
-import db.*
+import db.AppDatabaseQueries
+import db.Exercise
 
 interface ExerciseDataSource {
     suspend fun insertExercise(
@@ -12,7 +13,6 @@ interface ExerciseDataSource {
 
     suspend fun selectAllExercises(): List<Exercise>
     suspend fun selectAllFullExercises(): List<FullExercise>
-    suspend fun getAllExercisesByRoutinePlanId(id: Long): List<FullExercise>
 }
 
 internal class ExerciseDataSourceImpl(
@@ -42,17 +42,6 @@ internal class ExerciseDataSourceImpl(
     override suspend fun selectAllFullExercises(): List<FullExercise> =
         dbQuery.transactionWithResult {
             dbQuery.selectAllExercises().executeAsList().map {
-                FullExercise(
-                    it,
-                    dbQuery.selectMusclesByExerciseId(it.id).executeAsList(),
-                    dbQuery.selectEquipmentsByExerciseId(it.id).executeAsList()
-                )
-            }
-        }
-
-    override suspend fun getAllExercisesByRoutinePlanId(id: Long): List<FullExercise> =
-        dbQuery.transactionWithResult {
-            dbQuery.getAllExercisesByRoutinePlanId(id).executeAsList().map {
                 FullExercise(
                     it,
                     dbQuery.selectMusclesByExerciseId(it.id).executeAsList(),

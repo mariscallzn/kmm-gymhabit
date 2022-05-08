@@ -152,7 +152,16 @@ SELECT * FROM Exercise;
 selectAllRoutinePlans:
 SELECT * FROM RoutinePlan;
 
-getAllExercisesByRoutinePlanId:
+selectAllRoutinePlanExercises:
+SELECT * FROM RoutinePlanExercises;
+
+selectRoutinePlanExercisesById:
+SELECT * FROM RoutinePlanExercises WHERE id = ?;
+
+selectRoutinePlanById:
+SELECT * FROM RoutinePlan WHERE id = ?;
+
+selectAllExercisesByRoutinePlanId:
 SELECT Exercise.id, Exercise.name
 FROM Exercise
 JOIN RoutinePlanExercises

@@ -24,6 +24,9 @@ interface Repository {
     suspend fun getAllFullRoutinePlans(): List<FullRoutinePlan>
 
     @Throws(Exception::class)
+    suspend fun getFullRoutinePlanById(id: Long): FullRoutinePlan
+
+    @Throws(Exception::class)
     suspend fun createExercise(
         name: String,
         muscleIds: List<Long>,
@@ -48,7 +51,7 @@ interface Repository {
 class RepositoryImpl(
     private val catalogsDS: CatalogsDataSource,
     private val exerciseDS: ExerciseDataSource,
-    private val workoutSetDS: WorkoutSetDataSource,
+    private val workoutSetPlanDS: WorkoutSetPlanDataSource,
     private val routinePlanDS: RoutinePlanDataSource
 ) : Repository {
 
@@ -70,7 +73,11 @@ class RepositoryImpl(
 
     @Throws(Exception::class)
     override suspend fun getAllFullRoutinePlans(): List<FullRoutinePlan> =
-        routinePlanDS.selectAllRoutinePlans()
+        routinePlanDS.selectAllFullRoutinePlans()
+
+    @Throws(Exception::class)
+    override suspend fun getFullRoutinePlanById(id: Long): FullRoutinePlan =
+        routinePlanDS.selectFullRoutinePlanById(id)
 
     @Throws(Exception::class)
     override suspend fun createExercise(

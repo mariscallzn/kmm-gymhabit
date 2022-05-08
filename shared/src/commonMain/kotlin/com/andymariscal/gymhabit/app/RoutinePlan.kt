@@ -1,6 +1,5 @@
 package com.andymariscal.gymhabit.app
 
-import com.andymariscal.gymhabit.data.model.FullExercise
 import com.andymariscal.gymhabit.inf.Action
 import com.andymariscal.gymhabit.inf.Event
 import com.andymariscal.gymhabit.inf.State
@@ -34,8 +33,14 @@ sealed class RoutinePlanEvent : Event
 data class UiRoutinePlan(
     val id: Long?,
     val name: String,
-    val exercises: List<UiExercise>
+    val routinePlanExercise: UiRoutinePlanExercise
 )
+
+data class UiRoutinePlanExercise(
+    val id: Long?,
+    val exercise: List<UiExercise>
+)
+
 //endregion
 
 //region Redux Store
@@ -43,7 +48,7 @@ class RoutinePlanStore : Store<RoutinePlanState, RoutinePlanAction, RoutinePlanE
     CoroutineScope by CoroutineScope(Dispatchers.Main) {
 
     //region Global variables
-    private val repository = AppStore().provideRepository()
+    private val repository = AppStore.getInstance().provideRepository()
     private val state = MutableStateFlow(RoutinePlanState(emptyList(), emptyList()))
     private val event = MutableSharedFlow<RoutinePlanEvent>()
     //endregion
@@ -60,13 +65,8 @@ class RoutinePlanStore : Store<RoutinePlanState, RoutinePlanAction, RoutinePlanE
                     val exercises = repository.getAllFullExercises()
 
                     state.value = state.value.copy(
-                        routines = routinePlans.map { rp ->
-                            UiRoutinePlan(
-                                rp.id, rp.name,
-                                rp.exercise.map(::convertExercise)
-                            )
-                        },
-                        exercises = exercises.map(::convertExercise)
+                        routines = routinePlans.map(::convert),
+                        exercises = exercises.map(::convert)
                     )
                 }
             }
@@ -74,11 +74,7 @@ class RoutinePlanStore : Store<RoutinePlanState, RoutinePlanAction, RoutinePlanE
                 launch {
                     val routinePlan = repository.getAllFullRoutinePlans()
                     state.value = state.value.copy(
-                        routines = routinePlan.map { rp ->
-                            UiRoutinePlan(
-                                rp.id, rp.name, rp.exercise.map(::convertExercise)
-                            )
-                        }
+                        routines = routinePlan.map(::convert)
                     )
                 }
             }
@@ -86,7 +82,8 @@ class RoutinePlanStore : Store<RoutinePlanState, RoutinePlanAction, RoutinePlanE
                 launch {
                     val routinePlan = action.routinePlan
                     repository.createRoutinePlan(
-                        routinePlan.name, routinePlan.exercises.map { it.id ?: -1L }
+                        routinePlan.name,
+                        routinePlan.routinePlanExercise.exercise.map { it.id ?: -1L }
                     )
                     dispatch(RoutinePlanAction.ShowAll)
                 }
@@ -96,13 +93,8 @@ class RoutinePlanStore : Store<RoutinePlanState, RoutinePlanAction, RoutinePlanE
     //endregion
 
     //region Inner Logic
-    private fun convertExercise(fullExercise: FullExercise): UiExercise =
-        UiExercise(
-            fullExercise.exercise.id,
-            fullExercise.exercise.name,
-            fullExercise.muscles.map { uiM -> UiMuscles(uiM.id, uiM.name) },
-            fullExercise.equipments.map { uiEq -> UiEquipment(uiEq.id, uiEq.name) })
 
     //endregion
 }
+
 //endregion

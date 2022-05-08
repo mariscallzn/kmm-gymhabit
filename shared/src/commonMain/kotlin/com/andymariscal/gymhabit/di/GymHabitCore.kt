@@ -6,7 +6,6 @@ import com.andymariscal.gymhabit.data.ExerciseDataSourceImpl
 import com.andymariscal.gymhabit.data.WorkoutSetDataSourceImpl
 import com.andymariscal.gymhabit.database.DatabaseDriverFactory
 import db.AppDatabase
-import db.AppDatabaseQueries
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
 
@@ -20,7 +19,7 @@ class GymHabitCore(
     private val dataSources = module {
         single<CatalogsDataSource> { CatalogsDataSourceImpl(get()) }
         single<ExerciseDataSource> { ExerciseDataSourceImpl(get()) }
-        single<WorkoutSetDataSource> { WorkoutSetDataSourceImpl(get()) }
+        single<WorkoutSetPlanDataSource> { WorkoutSetDataSourceImpl(get()) }
         single<RoutinePlanDataSource> { RoutinePlanDataSourceImpl(get()) }
     }
 

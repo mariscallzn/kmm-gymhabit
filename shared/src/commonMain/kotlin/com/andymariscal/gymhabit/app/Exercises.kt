@@ -1,11 +1,16 @@
 package com.andymariscal.gymhabit.app
 
-import com.andymariscal.gymhabit.inf.*
-import kotlinx.coroutines.*
+import com.andymariscal.gymhabit.inf.Action
+import com.andymariscal.gymhabit.inf.Event
+import com.andymariscal.gymhabit.inf.State
+import com.andymariscal.gymhabit.inf.Store
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 
 //region Nano Redux Models
 /**
@@ -59,7 +64,7 @@ data class UiEquipment(
 class ExerciseStore : Store<ExerciseState, ExerciseAction, ExerciseEvent>,
     CoroutineScope by CoroutineScope(Dispatchers.Main) {
 
-    private val repository = AppStore().provideRepository()
+    private val repository = AppStore.getInstance().provideRepository()
 
     private val state = MutableStateFlow(ExerciseState(emptyList(), emptyList(), emptyList()))
     private val event = MutableSharedFlow<ExerciseEvent>()

@@ -11,10 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.andymariscal.gymhabit.app.RoutinePlanAction
-import com.andymariscal.gymhabit.app.RoutinePlanState
-import com.andymariscal.gymhabit.app.UiExercise
-import com.andymariscal.gymhabit.app.UiRoutinePlan
+import com.andymariscal.gymhabit.app.*
 
 @Composable
 fun RoutinePlanEditor(
@@ -75,7 +72,7 @@ fun CreateRoutinePlan(
                         UiRoutinePlan(
                             id = null,
                             name = routinePlanName,
-                            exercises = selectedExercises.toList()
+                            routinePlanExercise = UiRoutinePlanExercise(null, selectedExercises.toList())
                         )
                     )
                 )
@@ -100,7 +97,7 @@ fun RoutinePlanItem(uiRoutinePlan: UiRoutinePlan) {
     Column {
         Text(text = uiRoutinePlan.name)
         Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            uiRoutinePlan.exercises.forEach {
+            uiRoutinePlan.routinePlanExercise.exercise.forEach {
                 Text(text = it.name)
             }
         }
@@ -150,8 +147,8 @@ object PreviewData {
     )
 
     val routinePlans = listOf(
-        UiRoutinePlan(1, "Monday", exercises),
-        UiRoutinePlan(2, "Tuesday", exercises),
-        UiRoutinePlan(3, "Wednesday", exercises),
+        UiRoutinePlan(1, "Monday", UiRoutinePlanExercise(1, exercises)),
+        UiRoutinePlan(2, "Tuesday", UiRoutinePlanExercise(2, exercises)),
+        UiRoutinePlan(3, "Wednesday", UiRoutinePlanExercise(3, exercises)),
     )
 }

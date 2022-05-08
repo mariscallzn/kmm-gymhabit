@@ -2,12 +2,14 @@ package com.andymariscal.gymhabit.data
 
 import com.andymariscal.gymhabit.data.model.FullExercise
 import com.andymariscal.gymhabit.data.model.FullRoutinePlan
+import com.andymariscal.gymhabit.data.model.FullRoutinePlanExercises
 import com.andymariscal.gymhabit.inf.now
 import db.AppDatabaseQueries
 
 interface RoutinePlanDataSource {
-    //TODO This has to be a Full object
-    suspend fun selectAllRoutinePlans(): List<FullRoutinePlan>
+    suspend fun selectAllFullRoutinePlans(): List<FullRoutinePlan>
+
+    suspend fun selectFullRoutinePlanById(id: Long): FullRoutinePlan
 
     suspend fun insertRoutinePlan(
         title: String,
@@ -26,17 +28,41 @@ class RoutinePlanDataSourceImpl(
     private val dbQuery: AppDatabaseQueries
 ) : RoutinePlanDataSource {
 
-    override suspend fun selectAllRoutinePlans(): List<FullRoutinePlan> =
+    override suspend fun selectAllFullRoutinePlans(): List<FullRoutinePlan> =
         dbQuery.transactionWithResult {
             dbQuery.selectAllRoutinePlans().executeAsList().map { rp ->
                 FullRoutinePlan(rp.id, rp.title,
-                exercise = dbQuery.getAllExercisesByRoutinePlanId(rp.id).executeAsList().map {
-                    FullExercise(
-                        it,
-                        dbQuery.selectMusclesByExerciseId(it.id).executeAsList(),
-                        dbQuery.selectEquipmentsByExerciseId(it.id).executeAsList()
-                    )
-                })
+                    routinePlanExercises = dbQuery.selectRoutinePlanExercisesById(rp.id)
+                        .executeAsOne().let { rpe ->
+                        FullRoutinePlanExercises(rpe.id,
+                            dbQuery.selectAllExercisesByRoutinePlanId(rpe.id).executeAsList().map {
+                                FullExercise(
+                                    it,
+                                    dbQuery.selectAllMuscles().executeAsList(),
+                                    dbQuery.selectAllEquipments().executeAsList()
+                                )
+                            }
+                        )
+                    })
+
+            }
+        }
+
+    override suspend fun selectFullRoutinePlanById(id: Long): FullRoutinePlan =
+        dbQuery.transactionWithResult {
+            dbQuery.selectRoutinePlanById(id).executeAsOne().let { rp ->
+                FullRoutinePlan(rp.id, rp.title, dbQuery.selectRoutinePlanExercisesById(rp.id)
+                    .executeAsOne().let { rpe ->
+                        FullRoutinePlanExercises(rpe.id,
+                            dbQuery.selectAllExercisesByRoutinePlanId(rpe.id).executeAsList().map {
+                                FullExercise(
+                                    it,
+                                    dbQuery.selectAllMuscles().executeAsList(),
+                                    dbQuery.selectAllEquipments().executeAsList()
+                                )
+                            }
+                        )
+                    })
             }
         }
 
