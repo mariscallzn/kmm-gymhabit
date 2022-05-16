@@ -33,14 +33,19 @@ sealed class RoutinePlanEvent : Event
 data class UiRoutinePlan(
     val id: Long?,
     val name: String,
-    val routinePlanExercise: UiRoutinePlanExercise
+    val routinePlanExercise: List<UiRoutinePlanExercise>
 )
 
 data class UiRoutinePlanExercise(
     val id: Long?,
-    val exercise: List<UiExercise>
+    val exercisesSets: Map<UiExercise, List<UiSetPlan>>
 )
 
+data class UiSetPlan(
+    val reps: String,
+    val weight: String,
+    val weightUnit: String
+)
 //endregion
 
 //region Redux Store
@@ -83,7 +88,11 @@ class RoutinePlanStore : Store<RoutinePlanState, RoutinePlanAction, RoutinePlanE
                     val routinePlan = action.routinePlan
                     repository.createRoutinePlan(
                         routinePlan.name,
-                        routinePlan.routinePlanExercise.exercise.map { it.id ?: -1L }
+                        routinePlan.routinePlanExercise.flatMap {
+                            it.exercisesSets.map { d ->
+                                d.key.id ?: -1
+                            }
+                        }
                     )
                     dispatch(RoutinePlanAction.ShowAll)
                 }

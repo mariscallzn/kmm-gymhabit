@@ -3,8 +3,10 @@ package com.andymariscal.gymhabit.data
 import com.andymariscal.gymhabit.data.model.FullExercise
 import com.andymariscal.gymhabit.data.model.FullRoutinePlan
 import com.andymariscal.gymhabit.data.model.FullRoutinePlanExercises
+import com.andymariscal.gymhabit.data.model.FullSetPlan
 import com.andymariscal.gymhabit.inf.now
 import db.AppDatabaseQueries
+import db.RoutinePlan
 
 interface RoutinePlanDataSource {
     suspend fun selectAllFullRoutinePlans(): List<FullRoutinePlan>
@@ -30,40 +32,12 @@ class RoutinePlanDataSourceImpl(
 
     override suspend fun selectAllFullRoutinePlans(): List<FullRoutinePlan> =
         dbQuery.transactionWithResult {
-            dbQuery.selectAllRoutinePlans().executeAsList().map { rp ->
-                FullRoutinePlan(rp.id, rp.title,
-                    routinePlanExercises = dbQuery.selectRoutinePlanExercisesById(rp.id)
-                        .executeAsOne().let { rpe ->
-                        FullRoutinePlanExercises(rpe.id,
-                            dbQuery.selectAllExercisesByRoutinePlanId(rpe.id).executeAsList().map {
-                                FullExercise(
-                                    it,
-                                    dbQuery.selectAllMuscles().executeAsList(),
-                                    dbQuery.selectAllEquipments().executeAsList()
-                                )
-                            }
-                        )
-                    })
-
-            }
+            dbQuery.selectAllRoutinePlans().executeAsList().map(::convert)
         }
 
     override suspend fun selectFullRoutinePlanById(id: Long): FullRoutinePlan =
         dbQuery.transactionWithResult {
-            dbQuery.selectRoutinePlanById(id).executeAsOne().let { rp ->
-                FullRoutinePlan(rp.id, rp.title, dbQuery.selectRoutinePlanExercisesById(rp.id)
-                    .executeAsOne().let { rpe ->
-                        FullRoutinePlanExercises(rpe.id,
-                            dbQuery.selectAllExercisesByRoutinePlanId(rpe.id).executeAsList().map {
-                                FullExercise(
-                                    it,
-                                    dbQuery.selectAllMuscles().executeAsList(),
-                                    dbQuery.selectAllEquipments().executeAsList()
-                                )
-                            }
-                        )
-                    })
-            }
+            convert(dbQuery.selectRoutinePlanById(id).executeAsOne())
         }
 
     override suspend fun insertRoutinePlan(
@@ -95,4 +69,27 @@ class RoutinePlanDataSourceImpl(
         )
         dbQuery.lastInsertRowId().executeAsOne()
     }
+
+    private fun convert(rp: RoutinePlan): FullRoutinePlan =
+        FullRoutinePlan(rp.id, rp.title, dbQuery.selectRoutinePlanExercisesById(rp.id)
+            .executeAsList().map { rpe ->
+                FullRoutinePlanExercises(rpe.id,
+                    dbQuery.selectAllExercisesByRoutinePlanId(rpe.id).executeAsList()
+                        .associate {
+                            FullExercise(
+                                it,
+                                dbQuery.selectAllMuscles().executeAsList(),
+                                dbQuery.selectAllEquipments().executeAsList()
+                            ) to dbQuery.selectWorkoutSetPlanByExerciseId(it.id)
+                                .executeAsList().map { wsp ->
+                                    FullSetPlan(
+                                        wsp.id,
+                                        wsp.reps,
+                                        wsp.weight,
+                                        wsp.weight_unit
+                                    )
+                                }
+                        }
+                )
+            })
 }

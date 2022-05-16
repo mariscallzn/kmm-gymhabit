@@ -52,7 +52,7 @@ fun CreateRoutinePlan(
         Column {
             TextField(value = routinePlanName, onValueChange = { routinePlanName = it })
             Spacer(modifier = Modifier.padding(4.dp))
-            Log.e("RP","Exercises = $exercises")
+            Log.e("RP", "Exercises = $exercises")
             LazyRow(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 items(exercises) { item ->
                     Row {
@@ -72,7 +72,10 @@ fun CreateRoutinePlan(
                         UiRoutinePlan(
                             id = null,
                             name = routinePlanName,
-                            routinePlanExercise = UiRoutinePlanExercise(null, selectedExercises.toList())
+                            routinePlanExercise = listOf(UiRoutinePlanExercise(
+                                null,
+                                selectedExercises.toList().associateWith { emptyList() })
+                            )
                         )
                     )
                 )
@@ -97,8 +100,10 @@ fun RoutinePlanItem(uiRoutinePlan: UiRoutinePlan) {
     Column {
         Text(text = uiRoutinePlan.name)
         Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            uiRoutinePlan.routinePlanExercise.exercise.forEach {
-                Text(text = it.name)
+            uiRoutinePlan.routinePlanExercise.forEach {
+                it.exercisesSets.keys.forEach { uiE ->
+                    Text(text = uiE.name)
+                }
             }
         }
         Spacer(modifier = Modifier.padding(4.dp))
@@ -120,10 +125,12 @@ fun PreviewRoutinePlan() {
 @Preview
 @Composable
 fun PreviewRoutinePlanContent() {
-    RoutinePlanContent(state = RoutinePlanState(
-        PreviewData.routinePlans,
-        PreviewData.exercises
-    )){}
+    RoutinePlanContent(
+        state = RoutinePlanState(
+            PreviewData.routinePlans,
+            PreviewData.exercises
+        )
+    ) {}
 }
 
 object PreviewData {
@@ -147,8 +154,23 @@ object PreviewData {
     )
 
     val routinePlans = listOf(
-        UiRoutinePlan(1, "Monday", UiRoutinePlanExercise(1, exercises)),
-        UiRoutinePlan(2, "Tuesday", UiRoutinePlanExercise(2, exercises)),
-        UiRoutinePlan(3, "Wednesday", UiRoutinePlanExercise(3, exercises)),
+        UiRoutinePlan(
+            1, "Monday", listOf(UiRoutinePlanExercise(1,
+                exercises.associateWith { listOf(UiSetPlan("12", "30", "lb")) })
+        )),
+        UiRoutinePlan(
+            2,
+            "Tuesday",
+            listOf(UiRoutinePlanExercise(
+                2,
+                exercises.associateWith { listOf(UiSetPlan("12", "30", "lb")) })
+        )),
+        UiRoutinePlan(
+            3,
+            "Wednesday",
+            listOf(UiRoutinePlanExercise(
+                3,
+                exercises.associateWith { listOf(UiSetPlan("12", "30", "lb")) })
+        )),
     )
 }

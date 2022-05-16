@@ -23,7 +23,16 @@ sealed class WorkoutSetPlanAction : Action {
     ) : WorkoutSetPlanAction()
 
     data class Add(
-        val exerciseId: Long
+        val routinePlanId: Long,
+        val routinePlanExercisesId: Long,
+        val exerciseId: Long,
+        val reps: String,
+        val weight: String,
+        val weightUnit: String,
+    ) : WorkoutSetPlanAction()
+
+    data class ShowWorkoutSetPlan(
+        val routinePlanId: Long
     ) : WorkoutSetPlanAction()
 }
 
@@ -39,7 +48,15 @@ class WorkoutSetPlanStore : Store<WorkoutSetPlanState, WorkoutSetPlanAction, Wor
     CoroutineScope by CoroutineScope(Dispatchers.Main) {
 
     private val repository = AppStore.getInstance().provideRepository()
-    private val state = MutableStateFlow(WorkoutSetPlanState(UiRoutinePlan(0, "", UiRoutinePlanExercise(0, emptyList()))))
+    private val state = MutableStateFlow(
+        WorkoutSetPlanState(
+            UiRoutinePlan(
+                0,
+                "",
+                listOf(UiRoutinePlanExercise(0, emptyMap()))
+            )
+        )
+    )
     private val event = MutableSharedFlow<WorkoutSetPlanEvent>()
 
     //region Store
@@ -55,6 +72,27 @@ class WorkoutSetPlanStore : Store<WorkoutSetPlanState, WorkoutSetPlanAction, Wor
                     state.value = state.value.copy(
                         routinePlan = convert(routinePlan)
                     )
+                }
+            }
+
+            is WorkoutSetPlanAction.ShowWorkoutSetPlan -> {
+                launch {
+                    val routinePlan = repository.getFullRoutinePlanById(action.routinePlanId)
+                    state.value = state.value.copy(
+                        routinePlan = convert(routinePlan)
+                    )
+                }
+            }
+
+            is WorkoutSetPlanAction.Add -> {
+                launch {
+                    repository.createWorkoutSetPlan(
+                        action.routinePlanExercisesId,
+                        action.reps.toIntOrNull() ?: -1,
+                        action.weight.toFloatOrNull() ?: -1f,
+                        action.weightUnit
+                    )
+                    dispatch(WorkoutSetPlanAction.ShowWorkoutSetPlan(action.routinePlanId))
                 }
             }
         }

@@ -156,10 +156,13 @@ selectAllRoutinePlanExercises:
 SELECT * FROM RoutinePlanExercises;
 
 selectRoutinePlanExercisesById:
-SELECT * FROM RoutinePlanExercises WHERE id = ?;
+SELECT * FROM RoutinePlanExercises WHERE routine_plan_id = ?;
 
 selectRoutinePlanById:
 SELECT * FROM RoutinePlan WHERE id = ?;
+
+selectWorkoutSetPlanByExerciseId:
+SELECT * FROM WorkoutSetPlan WHERE routine_plan_exercise_id = ?;
 
 selectAllExercisesByRoutinePlanId:
 SELECT Exercise.id, Exercise.name
